@@ -43,7 +43,7 @@ class PropertyBox(Gtk.ListBox):
 
     def add_entry(self, label, value, data=None, callback=None, placeholder=None):
         widget = Gtk.Entry(text=str(value), xalign=1, width_chars=10, has_frame=False)
-        widget.connect('activate', self.prop_edited, None, data, callback, None)
+        widget.connect('changed', self.prop_edited, None, data, callback, None)
         if placeholder is not None:
             widget.set_placeholder_text(placeholder)
         self._add_row(label, widget)

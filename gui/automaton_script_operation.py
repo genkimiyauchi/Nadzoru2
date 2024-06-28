@@ -1,4 +1,5 @@
-
+import gi
+gi.require_version('GtkSource', '3.0')
 from gi.repository import Gtk, GtkSource
 from gui.base import PageMixin
 from machine.automaton import Automaton

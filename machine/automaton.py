@@ -433,10 +433,13 @@ class Automaton(Base):
         transitions = list()
         for s in self.states:
             transitions = transitions + list(s.out_transitions)
-        return "Events: {events} \nStates: {states}\nInitial: {initial}\nTransitions:\n    {transitions}".format(
+        return "Events({events_size}): {events} \nStates({states_size}): {states}\nInitial: {initial}\nTransitions({transitions_size}):\n    {transitions}".format(
+            events_size = len(self.events),
             events = ", ".join(map(lambda event: event.name, self.events)),
+            states_size = len(self.states),
             states = "; ".join(map(str, self.states)),
             initial = str(self.initial_state),
+            transitions_size = len(transitions),
             transitions = "\n    ".join(map(str, transitions)),
         )
 

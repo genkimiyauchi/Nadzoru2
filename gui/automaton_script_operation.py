@@ -175,7 +175,6 @@ class AutomatonScriptOperation(PageMixin, Gtk.Box):
                 if isinstance(automaton, Automaton) and automaton not in self.automatonlist:
                     automaton.set_name(name)
                     automaton.set_file_path_name(f"{name}.xml")
-                    automaton.save()
                     self.automatonlist.append(automaton)  #  adding obj to app.elements
                     if window is not None and self.open_result_checkbutton.get_active():
                         window.add_tab_editor(automaton, automaton.get_name()) 

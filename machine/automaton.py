@@ -1005,8 +1005,8 @@ class Automaton(Base):
             infile.seek(0)
 
             content = infile.readlines()
-            event_content_str = content[line_index_events+1:line_index_transitions]
-            transition_content_str = content[line_index_transitions+1:line_index_states]
+            event_content_str = content[line_index_events+1:line_index_states]
+            transition_content_str = content[line_index_transitions+1:line_index_events]
             state_content_str = content[line_index_states+1:]
 
 

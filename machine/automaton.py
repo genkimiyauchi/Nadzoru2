@@ -1027,8 +1027,8 @@ class Automaton(Base):
         event_data_str = get_data({ ('id', ' = {'),
                                     ('observable', '["observable"] = '),
                                     ('name', '["name"] ='),
-                                    ('controllable', '["controllable"] = ')},
-                                    ('public', '["public"] = '),
+                                    ('controllable', '["controllable"] = '),
+                                    ('public', '["shared"] = ')},
                                     event_content_str)
 
         transition_data_str = get_data({('id', ' = {'),

@@ -1060,9 +1060,9 @@ class Automaton(Base):
                 elif prop_name == 'name':
                     name = prop.replace('"', "")
                 elif prop_name == 'x':
-                    x = int(prop)
+                    x = float(prop)
                 elif prop_name == 'y':
-                    y = int(prop)
+                    y = float(prop)
 
             s = self.state_add(name, marked=is_marked, initial=is_initial, x=x, y=y)
             id_to_state_map[state_id] = s

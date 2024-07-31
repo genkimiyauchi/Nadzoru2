@@ -61,11 +61,12 @@ class Base:
         return memo[id(self)]
 
 class Event(Base):
-    def __init__(self, name='', controllable=False, observable=True, tex=None, *args, **kwargs):
+    def __init__(self, name='', controllable=False, observable=True, public=False, tex=None, *args, **kwargs):
         self.name = name
         self.tex = tex if tex is not None else name
         self.controllable = controllable
         self.observable = observable
+        self.public = public
         self.transitions = set()
         super().__init__(*args, **kwargs)
 
@@ -82,7 +83,7 @@ class Event(Base):
         
         
         if isinstance(self, Event):
-            new_obj = Event(str(self.name), self.controllable, self.observable, str(self.tex))
+            new_obj = Event(str(self.name), self.controllable, self.observable, self.public, str(self.tex))
         else:
             new_obj, memo = super().copy(memo)
         
@@ -134,6 +135,15 @@ class Event(Base):
         if isinstance(value, bool):
             self._observable = value
 
+    @property
+    def public(self):
+        return self._public
+    
+    @public.setter
+    def public(self, value):
+        if isinstance(value, bool):
+            self._public = value
+
     def transition_add(self, transition):
         self.transitions.add(transition)
 
@@ -141,6 +151,8 @@ class Event(Base):
         if self.controllable != other.controllable:
             return False
         if self.observable != other.observable:
+            return False
+        if self.public != other.public:
             return False
         return True
 
@@ -709,7 +721,7 @@ class Automaton(Base):
 
         for event_id, event in enumerate(self.events):
             event_to_id_map[event] = event_id
-            f.write(f'\t<event id="{event_id}" name="{event.name}" controllable="{event.controllable}" observable="{event.observable}"/>\n')
+            f.write(f'\t<event id="{event_id}" name="{event.name}" controllable="{event.controllable}" observable="{event.observable}" public="{event.public}"/>\n')
 
         for source_state in self.states:
             for transition in source_state.out_transitions:
@@ -755,8 +767,9 @@ class Automaton(Base):
             name = event_tag.getAttribute('name')
             is_observable = str2bool(event_tag.getAttribute('observable'))
             is_controllable = str2bool(event_tag.getAttribute('controllable'))
+            is_public = str2bool(event_tag.getAttribute('public'))
 
-            event = self.event_add(name, observable=is_observable, controllable=is_controllable)
+            event = self.event_add(name, observable=is_observable, controllable=is_controllable, public=is_public)
             id_to_event_map[event_id] = event
 
         for transition_tag in transition_tags:
@@ -812,7 +825,8 @@ class Automaton(Base):
             event_id = event_tag.getAttribute('id')
             is_observable = bool(event_tag.getElementsByTagName('observable'))
             is_controllable = bool(event_tag.getElementsByTagName('controllable'))
-            event = self.event_add(event_name, observable=is_observable, controllable=is_controllable)
+            is_public = bool(event_tag.getElementsByTagName('public'))
+            event = self.event_add(event_name, observable=is_observable, controllable=is_controllable, public=is_public)
             id_to_event_map[event_id] = event
 
         for transition_tag in transition_tags:
@@ -846,9 +860,9 @@ class Automaton(Base):
         for event_id, event in enumerate(self.events):
             event_id_map[event] = event_id
             if event.controllable == True:
-                f.write(f'\t<event id="{event_id+1}">\n \t\t<properties>\n \t\t\t<controllable />\n \t\t\t<observable />\n \t\t</properties>\n \t\t<name>{event.name}</name>\n \t</event>\n')
+                f.write(f'\t<event id="{event_id+1}">\n \t\t<properties>\n \t\t\t<controllable />\n \t\t\t<observable />\n \t\t\t<public />\n \t\t</properties>\n \t\t<name>{event.name}</name>\n \t</event>\n')
             else:
-                f.write(f'\t<event id="{event_id+1}">\n \t\t<properties>\n \t\t\t<observable />\n \t\t</properties>\n \t\t<name>{event.name}</name>\n \t</event>\n')
+                f.write(f'\t<event id="{event_id+1}">\n \t\t<properties>\n \t\t\t<observable />\n \t\t\t<public />\n \t\t</properties>\n \t\t<name>{event.name}</name>\n \t</event>\n')
 
         for source_state in self.states:
             for transition_id, transition in enumerate(source_state.out_transitions):
@@ -1014,6 +1028,7 @@ class Automaton(Base):
                                     ('observable', '["observable"] = '),
                                     ('name', '["name"] ='),
                                     ('controllable', '["controllable"] = ')},
+                                    ('public', '["public"] = '),
                                     event_content_str)
 
         transition_data_str = get_data({('id', ' = {'),
@@ -1062,10 +1077,12 @@ class Automaton(Base):
                     is_observable = prop.lower() == 'true'
                 elif prop_name == 'controllable':
                     is_controllable = prop.lower() == 'true'
+                elif prop_name == 'public':
+                    is_public = prop.lower() == 'true'
                 elif prop_name == 'name':
                     prop = prop.lstrip()
                     ev_name = prop.replace('"', "")
-            event = self.event_add(ev_name, observable=is_observable, controllable=is_controllable)
+            event = self.event_add(ev_name, observable=is_observable, controllable=is_controllable, public=is_public)
             id_to_event_map[ev_id] = event
 
         # Adding transitions
@@ -1500,7 +1517,7 @@ class Automaton(Base):
             for event in transition_function.keys():
                 target_state = merge_states(transition_function[event])
                 if event.name not in det_event_dict.keys():
-                    ev = determinized_automaton.event_add(event.name, event.controllable, event.observable)
+                    ev = determinized_automaton.event_add(event.name, event.controllable, event.observable, event.public)
                     det_event_dict[ev.name] = event
                 else:
                     ev = det_event_dict[event.name]

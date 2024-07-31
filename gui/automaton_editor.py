@@ -47,7 +47,7 @@ class AutomatonEditor(PageMixin, Gtk.Box):
 
 
     def build_treeview(self):
-        self.liststore = Gtk.ListStore(str, bool, bool, object)
+        self.liststore = Gtk.ListStore(str, bool, bool, bool, object)
 
         self.treeview = Gtk.TreeView(model=self.liststore)
         self.treeview_selection  = self.treeview.get_selection()
@@ -72,6 +72,12 @@ class AutomatonEditor(PageMixin, Gtk.Box):
         renderer_toggle_2.connect('toggled', self.renderer_toggle_observable)
         column_toggle_2 = Gtk.TreeViewColumn("Observable", renderer_toggle_2, active=2)
         self.treeview.append_column(column_toggle_2)
+
+        # Toggle 3
+        renderer_toggle_3 = Gtk.CellRendererToggle()
+        renderer_toggle_3.connect('toggled', self.renderer_toggle_public)
+        column_toggle3 = Gtk.TreeViewColumn("Public", renderer_toggle_3, active=3)
+        self.treeview.append_column(column_toggle3)
 
         self.sidebox.pack_start(self.treeview, True, True, 0)
 
@@ -102,7 +108,7 @@ class AutomatonEditor(PageMixin, Gtk.Box):
         rows = list()
 
         for event in self.automaton.events:
-            rows.append([event.name, event.controllable, event.observable, event])
+            rows.append([event.name, event.controllable, event.observable, event.public, event])
 
         rows.sort(key=lambda row: row[0])
 
@@ -114,20 +120,26 @@ class AutomatonEditor(PageMixin, Gtk.Box):
         
 
     def text_edited(self, widget, path, event_name):
-        event = self.liststore[path][3]
+        event = self.liststore[path][4]
         self.automaton.event_rename(event, event_name)
         self.update_treeview()
         self.trigger_change()
 
     def renderer_toggle_controllable(self, widget, path):
-        event = self.liststore[path][3]
+        event = self.liststore[path][4]
         event.controllable = not event.controllable
         self.update_treeview()
         self.trigger_change()
 
     def renderer_toggle_observable(self, widget, path):
-        event = self.liststore[path][3]
+        event = self.liststore[path][4]
         event.observable = not event.observable
+        self.update_treeview()
+        self.trigger_change()
+
+    def renderer_toggle_public(self, widget, path):
+        event = self.liststore[path][4]
+        event.public = not event.public
         self.update_treeview()
         self.trigger_change()
 
@@ -140,7 +152,7 @@ class AutomatonEditor(PageMixin, Gtk.Box):
         _, tree_path_list = self.treeview_selection.get_selected_rows()
         for tree_path in tree_path_list:
             tree_iter = self.liststore.get_iter(tree_path)
-            event = self.liststore.get(tree_iter, 3)[0]
+            event = self.liststore.get(tree_iter, 4)[0]
             self.automaton.event_remove(event)
         self.update_treeview()
         self.automaton_render.queue_draw()
@@ -266,7 +278,7 @@ class AutomatonEditor(PageMixin, Gtk.Box):
                     added_transition = False
                     for tree_path in tree_path_list:
                         tree_iter = self.liststore.get_iter(tree_path)
-                        selected_event = self.liststore.get(tree_iter, 3)[0]
+                        selected_event = self.liststore.get(tree_iter, 4)[0]
                         transition = self.automaton.transition_add(self.selected_state, state, selected_event)
                         if transition is not None:
                             added_transition = True

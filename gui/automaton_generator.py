@@ -1,12 +1,15 @@
 from gi.repository import Gtk
 from gui.base import PageMixin
-from codegen.code_gen import ArduinoGenerator
+from codegen.code_gen import ArduinoGenerator, YAMLGenerator
 from gui.property_box import PropertyBox
 from gui.dual_list_selector import DualListSelector
 
 
 class AutomatonGenerator(PageMixin, Gtk.Box):
-    devices = {"Arduino": ArduinoGenerator}
+    devices = {
+        "Arduino": ArduinoGenerator,
+        "YAML": YAMLGenerator
+    }
     def __init__(self, *args, **kwargs):
         if 'spacing' not in kwargs:
             kwargs['spacing'] = 2

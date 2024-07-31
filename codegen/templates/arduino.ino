@@ -15,6 +15,7 @@
 
 
 const unsigned char ev_controllable[{{ n_events }}] = {{ ev_controllable }};
+const unsigned char ev_public[{{ n_events }}] = {{ ev_public }};
 const unsigned char sup_events[{{ n_automatons }}][{{ n_events }}] = {{ sup_event_map }};
 const unsigned long int sup_init_state[{{ n_automatons }}] = {{ sup_init_state }};
 unsigned long int sup_current_state[{{ n_automatons }}] = {{ sup_current_state }};

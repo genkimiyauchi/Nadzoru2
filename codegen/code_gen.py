@@ -175,6 +175,9 @@ class ArduinoGenerator(GenericMcu):
         str_controllable = ['1' if event.controllable else '0'  for event in events]
         ev_controllable = _gen_str(str_controllable)
 
+        str_public = ['1' if event.public else '0'  for event in events]
+        ev_public = _gen_str(str_public)
+
         str_event_map = list()
         for automaton_event_list in event_map:
             str_event_map.append([1 if event else 0 for event in automaton_event_list])
@@ -183,6 +186,7 @@ class ArduinoGenerator(GenericMcu):
                 'events': events,
                 'data': data,
                 'ev_controllable': ev_controllable,
+                'ev_public': ev_public,
                 'sup_init_state': sup_init_state,
                 'sup_current_state': sup_current_state,
                 'sup_data_pos': sup_data_pos,

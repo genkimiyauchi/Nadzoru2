@@ -338,7 +338,10 @@ class AutomatonRenderer(Gtk.DrawingArea):
                     texts.append(", ")
                     colors.append('K')
                 event = transition.event
-                texts.append(event.name)
+                if event.public:
+                    texts.append(f'{event.name} : pub')
+                else:
+                    texts.append(event.name)
                 event_cfg = self.get_event_display_cfg(event)
                 colors.append(event_cfg['color'])
             self.write_text(cr, Vtext.x, Vtext.y, *texts, colors=colors,

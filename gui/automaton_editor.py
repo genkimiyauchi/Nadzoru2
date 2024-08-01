@@ -3,7 +3,7 @@ import sys
 import gi
 from gi.repository import GLib, Gio, Gtk, GObject
 
-from renderer import AutomatonRenderer
+from renderer import AutomatonRendererPublic
 from gui.base import PageMixin
 from gui.property_box import PropertyBox
 import machine.exceptions as expt
@@ -23,7 +23,7 @@ class AutomatonEditor(PageMixin, Gtk.Box):
 
         self.paned = Gtk.Paned(wide_handle=True)
         self.scrolled = Gtk.ScrolledWindow.new()
-        self.automaton_render = AutomatonRenderer(self.automaton)
+        self.automaton_render = AutomatonRendererPublic(self.automaton)
         self.sidebox = Gtk.Box(orientation = Gtk.Orientation.VERTICAL)
         self.frame_props = Gtk.Frame(label="Properties", visible=False, no_show_all=True)
 

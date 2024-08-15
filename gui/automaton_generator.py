@@ -4,9 +4,10 @@ from codegen.code_gen import ArduinoGenerator
 from gui.property_box import PropertyBox
 from gui.dual_list_selector import DualListSelector
 
+from codegen.code_gen_extensions import ArduinoGeneratorPublic
 
 class AutomatonGenerator(PageMixin, Gtk.Box):
-    devices = {"Arduino": ArduinoGenerator}
+    devices = {"Arduino": ArduinoGeneratorPublic}
     def __init__(self, *args, **kwargs):
         if 'spacing' not in kwargs:
             kwargs['spacing'] = 2

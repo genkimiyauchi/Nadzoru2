@@ -45,9 +45,26 @@ class AutomatonEditor(PageMixin, Gtk.Box):
         self.automaton_render.connect("button-release-event", self.on_button_release)
         self.propbox.connect('nadzoru-property-change', self.prop_edited)
 
+        self.index_object = 3
+
+    def build_treeview_create_liststore(self):
+        return Gtk.ListStore(str, bool, bool, object)
+    
+    def build_treeview_add_toggle(self):
+        # Toggle 1
+        renderer_toggle_1 = Gtk.CellRendererToggle()
+        renderer_toggle_1.connect('toggled', self.renderer_toggle_controllable)
+        column_toggle_1 = Gtk.TreeViewColumn('Controllable', renderer_toggle_1, active=1)
+        self.treeview.append_column(column_toggle_1)
+
+        # Toggle 2
+        renderer_toggle_2 = Gtk.CellRendererToggle()
+        renderer_toggle_2.connect('toggled', self.renderer_toggle_observable)
+        column_toggle_2 = Gtk.TreeViewColumn("Observable", renderer_toggle_2, active=2)
+        self.treeview.append_column(column_toggle_2)
 
     def build_treeview(self):
-        self.liststore = Gtk.ListStore(str, bool, bool, object)
+        self.liststore = self.build_treeview_create_liststore()
 
         self.treeview = Gtk.TreeView(model=self.liststore)
         self.treeview_selection  = self.treeview.get_selection()
@@ -61,17 +78,7 @@ class AutomatonEditor(PageMixin, Gtk.Box):
         column_editabletext = Gtk.TreeViewColumn("Event", renderer_editabletext, text=0)
         self.treeview.append_column(column_editabletext)
 
-        # Toggle 1
-        renderer_toggle_1 = Gtk.CellRendererToggle()
-        renderer_toggle_1.connect('toggled', self.renderer_toggle_controllable)
-        column_toggle_1 = Gtk.TreeViewColumn('Controllable', renderer_toggle_1, active=1)
-        self.treeview.append_column(column_toggle_1)
-
-        # Toggle 2
-        renderer_toggle_2 = Gtk.CellRendererToggle()
-        renderer_toggle_2.connect('toggled', self.renderer_toggle_observable)
-        column_toggle_2 = Gtk.TreeViewColumn("Observable", renderer_toggle_2, active=2)
-        self.treeview.append_column(column_toggle_2)
+        self.build_treeview_add_toggle()
 
         self.sidebox.pack_start(self.treeview, True, True, 0)
 
@@ -95,14 +102,18 @@ class AutomatonEditor(PageMixin, Gtk.Box):
         if self.automaton.name_validation():
             raise expt.InvalidEventNameError
 
+    def update_treeview_add_events(self, rows):
+        for event in self.automaton.events:
+            rows.append([event.name, event.controllable, event.observable, event])
+        return rows
+
     def update_treeview(self):
         cursor_path, cursor_focus_column = self.treeview.get_cursor()
 
         self.liststore.clear()
         rows = list()
 
-        for event in self.automaton.events:
-            rows.append([event.name, event.controllable, event.observable, event])
+        rows = self.update_treeview_add_events(rows)
 
         rows.sort(key=lambda row: row[0])
 
@@ -114,19 +125,19 @@ class AutomatonEditor(PageMixin, Gtk.Box):
         
 
     def text_edited(self, widget, path, event_name):
-        event = self.liststore[path][3]
+        event = self.liststore[path][self.index_object]
         self.automaton.event_rename(event, event_name)
         self.update_treeview()
         self.trigger_change()
 
     def renderer_toggle_controllable(self, widget, path):
-        event = self.liststore[path][3]
+        event = self.liststore[path][self.index_object]
         event.controllable = not event.controllable
         self.update_treeview()
         self.trigger_change()
 
     def renderer_toggle_observable(self, widget, path):
-        event = self.liststore[path][3]
+        event = self.liststore[path][self.index_object]
         event.observable = not event.observable
         self.update_treeview()
         self.trigger_change()
@@ -140,7 +151,7 @@ class AutomatonEditor(PageMixin, Gtk.Box):
         _, tree_path_list = self.treeview_selection.get_selected_rows()
         for tree_path in tree_path_list:
             tree_iter = self.liststore.get_iter(tree_path)
-            event = self.liststore.get(tree_iter, 3)[0]
+            event = self.liststore.get(tree_iter, self.index_object)[0]
             self.automaton.event_remove(event)
         self.update_treeview()
         self.automaton_render.queue_draw()
@@ -266,7 +277,7 @@ class AutomatonEditor(PageMixin, Gtk.Box):
                     added_transition = False
                     for tree_path in tree_path_list:
                         tree_iter = self.liststore.get_iter(tree_path)
-                        selected_event = self.liststore.get(tree_iter, 3)[0]
+                        selected_event = self.liststore.get(tree_iter, self.index_object)[0]
                         transition = self.automaton.transition_add(self.selected_state, state, selected_event)
                         if transition is not None:
                             added_transition = True

@@ -348,11 +348,6 @@ class AutomatonRenderer(Gtk.DrawingArea):
                     texts.append(", ")
                     colors.append('K')
                 event = transition.event
-                ###### Old lines ######
-                # texts.append(event.name)
-                # event_cfg = self.get_event_display_cfg(event)
-                # colors.append(event_cfg['color'])
-                ###### New lines ######
                 event_texts, event_colors = self.get_transition_texts_and_colors(event)
                 texts.extend(event_texts)
                 colors.extend(event_colors)

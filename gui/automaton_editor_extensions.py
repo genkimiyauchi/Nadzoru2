@@ -10,9 +10,7 @@ class AutomatonEditorPublic(AutomatonEditor):
     def build_treeview_create_liststore(self):
         return Gtk.ListStore(str, bool, bool, bool, object)
     
-    def build_treeview_add_toggle(self):
-        super().build_treeview_add_toggle()
-
+    def add_extra_toggles(self):
         # Toggle 3
         renderer_toggle_3 = Gtk.CellRendererToggle()
         renderer_toggle_3.connect('toggled', self.renderer_toggle_public)

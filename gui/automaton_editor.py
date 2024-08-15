@@ -50,18 +50,8 @@ class AutomatonEditor(PageMixin, Gtk.Box):
     def build_treeview_create_liststore(self):
         return Gtk.ListStore(str, bool, bool, object)
     
-    def build_treeview_add_toggle(self):
-        # Toggle 1
-        renderer_toggle_1 = Gtk.CellRendererToggle()
-        renderer_toggle_1.connect('toggled', self.renderer_toggle_controllable)
-        column_toggle_1 = Gtk.TreeViewColumn('Controllable', renderer_toggle_1, active=1)
-        self.treeview.append_column(column_toggle_1)
-
-        # Toggle 2
-        renderer_toggle_2 = Gtk.CellRendererToggle()
-        renderer_toggle_2.connect('toggled', self.renderer_toggle_observable)
-        column_toggle_2 = Gtk.TreeViewColumn("Observable", renderer_toggle_2, active=2)
-        self.treeview.append_column(column_toggle_2)
+    def add_extra_toggles(self): # By default, do nothing. Overwrite this function in the extensions to add more toggles.
+        pass
 
     def build_treeview(self):
         self.liststore = self.build_treeview_create_liststore()
@@ -78,7 +68,19 @@ class AutomatonEditor(PageMixin, Gtk.Box):
         column_editabletext = Gtk.TreeViewColumn("Event", renderer_editabletext, text=0)
         self.treeview.append_column(column_editabletext)
 
-        self.build_treeview_add_toggle()
+        # Toggle 1
+        renderer_toggle_1 = Gtk.CellRendererToggle()
+        renderer_toggle_1.connect('toggled', self.renderer_toggle_controllable)
+        column_toggle_1 = Gtk.TreeViewColumn('Controllable', renderer_toggle_1, active=1)
+        self.treeview.append_column(column_toggle_1)
+
+        # Toggle 2
+        renderer_toggle_2 = Gtk.CellRendererToggle()
+        renderer_toggle_2.connect('toggled', self.renderer_toggle_observable)
+        column_toggle_2 = Gtk.TreeViewColumn("Observable", renderer_toggle_2, active=2)
+        self.treeview.append_column(column_toggle_2)
+
+        self.add_extra_toggles()
 
         self.sidebox.pack_start(self.treeview, True, True, 0)
 

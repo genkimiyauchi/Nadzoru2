@@ -3,7 +3,7 @@ import sys
 import gi
 from gi.repository import GLib, Gio, Gtk, GObject
 
-from renderer import AutomatonRendererPublic
+from renderer import AutomatonRendererPublic, AutomatonRendererProbabilistic
 from gui.base import PageMixin
 from gui.property_box import PropertyBox
 import machine.exceptions as expt
@@ -23,7 +23,7 @@ class AutomatonEditor(PageMixin, Gtk.Box):
 
         self.paned = Gtk.Paned(wide_handle=True)
         self.scrolled = Gtk.ScrolledWindow.new()
-        self.automaton_render = AutomatonRendererPublic(self.automaton)
+        self.automaton_render = AutomatonRendererProbabilistic(self.automaton)
         self.sidebox = Gtk.Box(orientation = Gtk.Orientation.VERTICAL)
         self.frame_props = Gtk.Frame(label="Properties", visible=False, no_show_all=True)
 
@@ -162,6 +162,8 @@ class AutomatonEditor(PageMixin, Gtk.Box):
     def _get_selected_object(self):
         if self.selected_state is not None:
             return self.selected_state
+        elif self.selected_transitions is not None:
+            return self.selected_transitions
         else:
             return None
             # return self.selected_arc
@@ -172,25 +174,45 @@ class AutomatonEditor(PageMixin, Gtk.Box):
         selected_object = self._get_selected_object()
 
         if selected_object is not None:
-            for prop in selected_object.properties:
-                label_text = prop['label']
-                property_name = prop['property']
-                value = getattr(selected_object, property_name)
-                if prop['gtk_control'] == 'checkbutton':
-                    self.propbox.add_checkbutton(label_text, value, property_name)
-                elif prop['gtk_control'] == 'entry':
-                    self.propbox.add_entry(label_text, value, property_name)
-                elif prop['gtk_control'] == 'switch':
-                    self.propbox.add_switch(label_text, value, property_name)
-                elif prop['gtk_control'] == 'spinbutton':
-                    self.propbox.add_spinbutton(label_text, value, property_name, lower=-5000, upper=5000)
+            if self.selected_state is not None:
+                for prop in selected_object.properties:
+                    label_text = prop['label']
+                    property_name = prop['property']
+                    value = getattr(selected_object, property_name)
+                    if prop['gtk_control'] == 'checkbutton':
+                        self.propbox.add_checkbutton(label_text, value, property_name)
+                    elif prop['gtk_control'] == 'entry':
+                        self.propbox.add_entry(label_text, value, property_name)
+                    elif prop['gtk_control'] == 'switch':
+                        self.propbox.add_switch(label_text, value, property_name)
+                    elif prop['gtk_control'] == 'spinbutton':
+                        self.propbox.add_spinbutton(label_text, value, property_name, lower=-5000, upper=5000)
+            elif self.selected_transitions is not None:
+                for transition in selected_object:
+                    for prop in transition.properties:
+                        label_text = f'{transition.event}:\t{prop["label"]}'
+                        property_name = prop['property']
+                        value = getattr(transition, property_name)
+                        if prop['gtk_control'] == 'checkbutton':
+                            self.propbox.add_checkbutton(label_text, value, property_name)
+                        elif prop['gtk_control'] == 'entry':
+                            self.propbox.add_entry(label_text, value, property_name, event_name=transition.event.name)
+                        elif prop['gtk_control'] == 'switch':
+                            self.propbox.add_switch(label_text, value, property_name)
+                        elif prop['gtk_control'] == 'spinbutton':
+                            self.propbox.add_spinbutton(label_text, value, property_name, lower=-5000, upper=5000)
             self.propbox.show_all()
             self.frame_props.show()
 
-    def prop_edited(self, propbox, value, data):
+    def prop_edited(self, propbox, value, data, widget_name):
         selected_object = self._get_selected_object()
         if selected_object is not None:
-            setattr(selected_object, data, value)
+            if self.selected_state is not None:
+                setattr(selected_object, data, value)
+            elif self.selected_transitions is not None:
+                for i, transition in enumerate(selected_object):
+                    if transition.event.name == widget_name:
+                        setattr(selected_object[i], data, value)
             self.automaton_render.queue_draw()
             self.trigger_change()
 

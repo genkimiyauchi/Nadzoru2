@@ -357,6 +357,8 @@ class State(Base):
 
 
 class Transition(Base):
+    properties = [{}] # Place holder properties
+
     def __init__(self, from_state, to_state, event, *args, **kwargs):
         self.from_state = from_state
         self.to_state = to_state
@@ -388,9 +390,6 @@ class Transition(Base):
             return memo[id(self)], memo
         return memo[id(self)]
 
-    def __str__(self):
-        return "{from_state:<8}, {event:<8} --> {to_state}".format(from_state=str(self.from_state), event=str(self.event), to_state=str(self.to_state))
-
     @property
     def from_state(self):
         return self._from_state
@@ -408,7 +407,6 @@ class Transition(Base):
     def to_state(self, value):
         if isinstance(value, State):
             self._to_state = value
-
 
     def __str__(self):
         return "{from_state}, {event} --> {to_state}".format(from_state=self.from_state, to_state=self.to_state, event=self.event)

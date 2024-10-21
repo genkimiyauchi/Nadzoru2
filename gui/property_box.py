@@ -41,11 +41,13 @@ class PropertyBox(Gtk.ListBox):
         self._add_row(label, widget)
         return widget
 
-    def add_entry(self, label, value, data=None, callback=None, placeholder=None):
+    def add_entry(self, label, value, data=None, callback=None, placeholder=None, event_name=None):
         widget = Gtk.Entry(text=str(value), xalign=1, width_chars=10, has_frame=False)
-        widget.connect('changed', self.prop_edited, None, data, callback, None)
+        widget.connect('activate', self.prop_edited, None, data, callback, None)
         if placeholder is not None:
             widget.set_placeholder_text(placeholder)
+        if event_name is not None:
+            widget.set_name(event_name)
         self._add_row(label, widget)
         return widget
 
@@ -120,7 +122,7 @@ class PropertyBox(Gtk.ListBox):
         else:
             value = None
 
-        self.emit('nadzoru-property-change', value, data)
+        self.emit('nadzoru-property-change', value, data, widget.get_name())
         if callback is not None:
             callback(widget, value, data)
 
@@ -242,4 +244,4 @@ GObject.signal_new('nadzoru-property-change',
     PropertyBox,
     GObject.SignalFlags.RUN_LAST,
     GObject.TYPE_PYOBJECT,
-    (GObject.TYPE_PYOBJECT, GObject.TYPE_PYOBJECT,))
+    (GObject.TYPE_PYOBJECT, GObject.TYPE_PYOBJECT, GObject.TYPE_PYOBJECT, ))
